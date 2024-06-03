@@ -6,7 +6,7 @@ jobs:
   maestro-testing:
     runs-on: macos-13
     env:
-      DEVELOPER_DIR: /Application/Xcode_14.3.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_14.3.app/Contents/Developer
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
