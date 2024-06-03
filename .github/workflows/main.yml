@@ -53,7 +53,7 @@ jobs:
       - name: run iOS simulator
         run: |
           sed -i -e 's/ONLY_ACTIVE_ARCH = NO;/ONLY_ACTIVE_ARCH = YES;/g' ./ios/MaestroCache.xcodeproj/project.pbxproj
-          npx react-native run-ios --simulator="iPhone 14 Pro (16.4)" --configuration Release
+          npx react-native run-ios --simulator="iPhone 14 Pro (16.4)"
           
       - name: run Maestro
         run: maestro test ./maestro/test.yaml
