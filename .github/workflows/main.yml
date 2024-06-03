@@ -35,6 +35,10 @@ jobs:
 
       - name: Install Maestro
         run: "export MAESTRO_VERSION={1.36.0}; curl -Ls 'https://get.maestro.mobile.dev' | bash && brew tap facebook/fb && brew install facebook/fb/idb-companion"
+
+      - name: Set Mastro path
+        run: |
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
       
       - name: Restore Pods cache
         uses: actions/cache@v3
