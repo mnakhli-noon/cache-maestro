@@ -1,0 +1,63 @@
+name: Cache Maestro
+
+on: push
+
+jobs:
+  maestro-testing:
+    runs-on: macos-13
+    env:
+      DEVELOPER_DIR: /Application/Xcode_14.3.app/Contents/Developer
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Application/Xcode_14.3.app
+      - name: Cache yarn packages and pods
+        id: cache-yarn
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.yarn
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+            
+
+      - name: install dependencies
+        run: yarn
+
+      - name: Install Maestro
+        run: "export MAESTRO_VERSION={1.36.0}; curl -Ls 'https://get.maestro.mobile.dev' | bash && brew tap facebook/fb && brew install facebook/fb/idb-companion"
+      
+      - name: Restore Pods cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            examples/basic/ios/Pods
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: install pods
+        run: cd ios && pod install --repo-update
+
+      - name: run iOS simulator
+        run: |
+          sed -i -e 's/ONLY_ACTIVE_ARCH = NO;/ONLY_ACTIVE_ARCH = YES;/g' ./ios/MaestroCache.xcodeproj/project.pbxproj
+          npx react-native run-ios --simulator="iPhone 14 Pro (16.4)" --configuration Release
+          
+      - name: run Maestro
+        run: maestro test ./maestro/test.yaml
+  
+        
+        
+  
