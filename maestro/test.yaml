@@ -1,0 +1,4 @@
+appId: "com.maestro.cache"
+---
+- launchApp
+- assertVisible: "Welcome to React Native"
