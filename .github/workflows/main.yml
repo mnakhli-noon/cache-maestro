@@ -55,6 +55,15 @@ jobs:
       - name: install pods
         run: cd ios && pod install --repo-update
 
+      - name: Restore Xcode Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-xcode-${{ hashFiles('**Podfile.lock') }}
+          retore-keys: |
+            ${{ runner.os }}-xcode-
+
       - name: run iOS simulator
         run: |
           sed -i -e 's/ONLY_ACTIVE_ARCH = NO;/ONLY_ACTIVE_ARCH = YES;/g' ./ios/MaestroCache.xcodeproj/project.pbxproj
