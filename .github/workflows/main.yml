@@ -60,7 +60,7 @@ jobs:
         with:
           path: |
             ~/Library/Developer/Xcode/DerivedData
-          key: ${{ runner.os }}-xcode-${{ hashFiles('**Podfile.lock') }}
+          key: ${{ runner.os }}-xcode-${{ hashFiles('**/Podfile.lock') }}
           retore-keys: |
             ${{ runner.os }}-xcode-
 
