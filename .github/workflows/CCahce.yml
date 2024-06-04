@@ -1,0 +1,30 @@
+name: CCache example
+
+on: push
+
+jobs:
+  ccache-example:
+    runs-on: macos-13
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_14.3.app/Contents/Developer
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Installing CCache
+        run: brew install ccache
+
+      - name: Configure CCache
+        run: |
+          ln -s $(which ccache) /usr/local/bin/gcc
+          ln -s $(which ccache) /usr/local/bin/g++
+          ln -s $(which ccache) /usr/local/bin/cc
+          ln -s $(which ccache) /usr/local/bin/c++
+          ln -s $(which ccache) /usr/local/bin/clang
+          ln -s $(which ccache) /usr/local/bin/clang++
+
+      - name: Checking CCache
+        run: which gcc
+
+      
+        
