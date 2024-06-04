@@ -22,7 +22,8 @@ jobs:
         env:
           cache-name: cache-node-modules
         with:
-          path: ~/.yarn
+          path: |
+            **/node_modules
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
