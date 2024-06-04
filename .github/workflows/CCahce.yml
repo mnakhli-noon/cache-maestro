@@ -23,8 +23,63 @@ jobs:
           ln -s $(which ccache) /usr/local/bin/clang
           ln -s $(which ccache) /usr/local/bin/clang++
 
-      - name: Checking CCache
-        run: which gcc
+      - name: Setting some envirnmoent variables
+        run: |
+          export CLANG=clang
+          export CLANGPLUSPLUS=clang++
+          export LD=clang
+          export LDPLUSPLUS=clang++
+          export CCACHE_COMPILERCHECK=content
+          export CCACHE_SLOPPINESS=clang_index_store,file_stat_matches,include_file_ctime,include_file_mtime,ivfsoverlay,pch_defines,modules,system_headers,time_macros
+          export CCACHE_FILECLONE=true
+          export CCACHE_DEPEND=true
+          export CCACHE_INODECACHE=true
+
+      - name: install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Run xcode-select
+        run: sudo xcode-select -s /Applications/Xcode_14.3.app
+
+      - name: Cache yarn packages and pods
+        id: cache-yarn
+        uses: actions/cache@v4
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+            
+
+      - name: install dependencies
+        run: yarn
+
+      - name: Restore Pods cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            examples/basic/ios/Pods
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: install pods
+        run: cd ios && pod install --repo-update
+
+      - name: run iOS simulator
+        run: |
+          sed -i -e 's/ONLY_ACTIVE_ARCH = NO;/ONLY_ACTIVE_ARCH = YES;/g' ./ios/MaestroCache.xcodeproj/project.pbxproj
+          npx react-native run-ios --simulator="iPhone 14 Pro (16.4)"
+        
+
 
       
         
