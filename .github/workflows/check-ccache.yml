@@ -16,7 +16,7 @@ jobs:
         run: xcrun simctl list devices | grep -E "iPhone 14 Pro \(.*\)" | head -n 1 | cut -d '(' -f 2 | cut -d ')' -f 1
 
       - name: See Simulators list
-        run: open -a Simulator --args -CurrentDeviceUDID $(xcrun simctl list devices | grep -E "iPhone 14 Pro \(.*\)" | head -n 1 | cut -d '(' -f 2 | cut -d ')' -f 1)
+        run: xcrun simctl list devices | grep -E "iPhone 14 Pro \(.*\)" | head -n 1 | cut -d '(' -f 2 | cut -d ')' -f 1
 
       - name: see if the simulator is open
         run: xcrun simctl list devices booted
