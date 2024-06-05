@@ -45,6 +45,7 @@ jobs:
             ${{ runner.os }}-pods-
 
       - name: install pods
+        continue-on-error: true
         run: cd ios && pod install --repo-update
         
       - name: See what we have in DerviedData 1
@@ -52,8 +53,7 @@ jobs:
           cd "~/Library/Developer/Xcode/DerivedData"
           ls
 
-      - name: Cache Xcode Dervied Data
-        continue-on-error: true
+      - name: Cache Xcode Derived Data
         uses: actions/cache@v3
         with:
           path: |
