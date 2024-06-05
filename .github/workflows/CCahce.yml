@@ -20,6 +20,13 @@ jobs:
       - name: Run xcode-select
         run: sudo xcode-select -s /Applications/Xcode_14.3.app
 
+      - name: Install Maestro
+        run: "export MAESTRO_VERSION={1.36.0}; curl -Ls 'https://get.maestro.mobile.dev' | bash && brew tap facebook/fb && brew install facebook/fb/idb-companion"
+
+      - name: Set Mastro path
+        run: |
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
       - name: Cache yarn packages
         id: cache-yarn
         uses: actions/cache@v3
@@ -51,7 +58,7 @@ jobs:
       - name: See what we have in DerviedData 1
         continue-on-error: true
         run: |
-          cd "~/Library/Developer/Xcode/DerivedData"
+          cd ~/Library/Developer/Xcode/DerivedData
           ls
 
       - name: Cache Xcode Derived Data
@@ -66,7 +73,7 @@ jobs:
       - name: See what we have in DerviedData 2
         continue-on-error: true
         run: |
-          cd "~/Library/Developer/Xcode/DerivedData"
+          cd ~/Library/Developer/Xcode/DerivedData
           ls
 
 
@@ -78,7 +85,7 @@ jobs:
       - name: See what we have in DerviedData 3
         continue-on-error: true
         run: |
-          cd "~/Library/Developer/Xcode/DerivedData"
+          cd ~/Library/Developer/Xcode/DerivedData
           ls
 
       - name: run Maestro
