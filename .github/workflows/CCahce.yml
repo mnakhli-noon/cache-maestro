@@ -45,10 +45,11 @@ jobs:
             ${{ runner.os }}-pods-
 
       - name: install pods
-        continue-on-error: true
+       
         run: cd ios && pod install --repo-update
         
       - name: See what we have in DerviedData 1
+        continue-on-error: true
         run: |
           cd "~/Library/Developer/Xcode/DerivedData"
           ls
