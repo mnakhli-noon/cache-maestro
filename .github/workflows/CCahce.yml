@@ -7,31 +7,10 @@ jobs:
     runs-on: macos-13
     env: 
       DEVELOPER_DIR: /Applications/Xcode_14.3.app/Contents/Developer
-      CLANG: clang
-      CLANGPLUSPLUS: clang++
-      LD: clang
-      LDPLUSPLUS: clang++
-      CCACHE_COMPILERCHECK: content
-      CCACHE_SLOPPINESS: clang_index_store,file_stat_matches,include_file_ctime,include_file_mtime,ivfsoverlay,pch_defines,modules,system_headers,time_macros
-      CCACHE_FILECLONE: true
-      CCACHE_DEPEND: true
-      CCACHE_INODECACHE: true
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
-      - name: Installing CCache
-        run: brew install ccache
-
-      - name: Configure CCache
-        run: |
-          ln -s $(which ccache) /usr/local/bin/gcc
-          ln -s $(which ccache) /usr/local/bin/g++
-          ln -s $(which ccache) /usr/local/bin/cc
-          ln -s $(which ccache) /usr/local/bin/c++
-          ln -s $(which ccache) /usr/local/bin/clang
-          ln -s $(which ccache) /usr/local/bin/clang++
 
       - name: install node
         uses: actions/setup-node@v4
@@ -41,19 +20,15 @@ jobs:
       - name: Run xcode-select
         run: sudo xcode-select -s /Applications/Xcode_14.3.app
 
-      - name: Cache yarn packages and pods
+      - name: Cache yarn packages
         id: cache-yarn
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-node-modules
+        uses: actions/cache@v3
         with:
           path: |
             **/node_modules
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-packages-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+            ${{ runner.os }}-packages-
             
 
       - name: install dependencies
@@ -63,7 +38,6 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            examples/basic/ios/Pods
             ~/Library/Caches/CocoaPods
             ~/.cocoapods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
@@ -73,22 +47,25 @@ jobs:
       - name: install pods
         run: cd ios && pod install --repo-update
 
-      - name: CCache
+      - name: Cache Xcode Dervied Data
         uses: actions/cache@v3
         with:
-          path: "~/Library/Caches/ccache"
-          key: ${{ runner.os }}-ccache-${{ hashFiles('**/Podfile.lock') }}
+          path: |
+            ~/Library/Developer/Xcode/DerivedData
+          key: ${{ runner.os }}-xcode-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
-            ${{ runner.os }}-ccache-
-          
-        
+            ${{ runner.os }}-xcode-
 
       - name: run iOS simulator
         run: |
           sed -i -e 's/ONLY_ACTIVE_ARCH = NO;/ONLY_ACTIVE_ARCH = YES;/g' ./ios/MaestroCache.xcodeproj/project.pbxproj
-          npx react-native run-ios --simulator="iPhone 14 Pro (16.4)"
-        
+          npx react-native run-ios --simulator="iPhone 14 Pro (16.4)" --mode=Release
 
+      - name: See what we have in DerviedData
+        run: |
+          cd "~/Library/Developer/Xcode/DerivedData"
+          ls
 
-      
-        
+      - name: run Maestro
+        run: maestro test ./maestro/test.yaml
+        continue-on-error: true
