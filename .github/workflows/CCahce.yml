@@ -54,23 +54,15 @@ jobs:
       - name: install pods
        
         run: cd ios && pod install --repo-update
-        
-      - name: See what we have in DerviedData 1
-        continue-on-error: true
-        run: |
-          cd ~/Library/Developer/Xcode/DerivedData
-          ls
 
       - name: Cache Xcode Derived Data
-        uses: actions/cache@v3
+        uses: irgaly/xcode-cache@v1
         with:
-          path: |
-            ~/Library/Developer/Xcode/DerivedData
           key: ${{ runner.os }}-xcode-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-xcode-
 
-      - name: See what we have in DerviedData 2
+      - name: See what we have in DerviedData 1
         continue-on-error: true
         run: |
           cd ~/Library/Developer/Xcode/DerivedData
@@ -82,7 +74,7 @@ jobs:
           sed -i -e 's/ONLY_ACTIVE_ARCH = NO;/ONLY_ACTIVE_ARCH = YES;/g' ./ios/MaestroCache.xcodeproj/project.pbxproj
           npx react-native run-ios --simulator="iPhone 14 Pro (16.4)" --mode=Release
 
-      - name: See what we have in DerviedData 3
+      - name: See what we have in DerviedData 2
         continue-on-error: true
         run: |
           cd ~/Library/Developer/Xcode/DerivedData
