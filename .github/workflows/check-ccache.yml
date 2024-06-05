@@ -1,0 +1,17 @@
+name: checking-if-we-ccache-correct
+
+on: push
+
+jobs:
+  check-correct-ccache:
+    runs-on: macos-13
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_14.3.app/Contents/Developer
+
+    steps:
+      - name: Run xcode-select
+        run: sudo xcode-select -s /Applications/Xcode_14.3.app
+
+      - name: See Simulators list
+        run: xcurn simctl list devices
+  
