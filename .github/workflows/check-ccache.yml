@@ -12,6 +12,9 @@ jobs:
       - name: Run xcode-select
         run: sudo xcode-select -s /Applications/Xcode_14.3.app
 
+      - name: see the output of the command
+        run: xcrun simctl list devices | grep -E "iPhone 14 Pro \(.*\)
+
       - name: See Simulators list
         run: open -a Simulator --args -CurrentDeviceUDID $(xcrun simctl list devices | grep -E "iPhone 14 Pro \(.*\)" | head -n 1 | cut -d '(' -f 2 | cut -d ')' -f 1)
 
