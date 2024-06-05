@@ -13,4 +13,4 @@ jobs:
         run: sudo xcode-select -s /Applications/Xcode_14.3.app
 
       - name: See Simulators list
-        run: xcrun simctl list devices | grep -e "iPhone 14 Pro (.*)" | head -n 1 | cut -d '(' -f 2
+        run: xcrun simctl list devices | grep -e "iPhone 14 Pro (.*)" | head -n 1 | cut -d '(' -f 2 | read SIMULATOR_ID | echo "$SIMULATOR_ID"
