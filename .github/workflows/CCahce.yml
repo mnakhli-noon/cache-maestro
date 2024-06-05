@@ -53,6 +53,7 @@ jobs:
           ls
 
       - name: Cache Xcode Dervied Data
+        continue-on-error: true
         uses: actions/cache@v3
         with:
           path: |
@@ -62,6 +63,7 @@ jobs:
             ${{ runner.os }}-xcode-
 
       - name: See what we have in DerviedData 2
+        continue-on-error: true
         run: |
           cd "~/Library/Developer/Xcode/DerivedData"
           ls
@@ -73,6 +75,7 @@ jobs:
           npx react-native run-ios --simulator="iPhone 14 Pro (16.4)" --mode=Release
 
       - name: See what we have in DerviedData 3
+        continue-on-error: true
         run: |
           cd "~/Library/Developer/Xcode/DerivedData"
           ls
