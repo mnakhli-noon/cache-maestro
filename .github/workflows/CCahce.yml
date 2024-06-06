@@ -4,7 +4,7 @@ on: push
 
 jobs:
   ccache-example:
-    runs-on: macos-14-xlarge
+    runs-on: macos-14
     
 
     steps:
