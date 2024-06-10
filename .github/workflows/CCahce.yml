@@ -4,8 +4,9 @@ on: push
 
 jobs:
   ccache-example:
-    runs-on: macos-14
-    
+    runs-on: macos-13
+    env: 
+      DEVELOPER_DIR: /Applications/Xcode_14.3.app/Contents/Developer
 
     steps:
       - name: Checkout Code
@@ -15,6 +16,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
+          
+      - name: Run xcode-select
+        run: sudo xcode-select -s /Applications/Xcode_14.3.app
 
       - name: Install Maestro
         run: "export MAESTRO_VERSION={1.36.0}; curl -Ls 'https://get.maestro.mobile.dev' | bash && brew tap facebook/fb && brew install facebook/fb/idb-companion"
@@ -24,8 +28,8 @@ jobs:
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
       - name: Cache yarn packages
-        id: cache-yarn
-        uses: actions/cache@v3
+        id: cache_yarn
+        uses: actions/cache@v4
         with:
           path: |
             **/node_modules
@@ -35,10 +39,12 @@ jobs:
             
 
       - name: install dependencies
+        if: steps.cache_yarn.outputs.cache-hit != 'true'
         run: yarn
 
       - name: Restore Pods cache
         uses: actions/cache@v3
+        id: cache_pods
         with:
           path: |
             ~/Library/Caches/CocoaPods
@@ -48,19 +54,14 @@ jobs:
             ${{ runner.os }}-pods-
 
       - name: install pods
+        if: steps.cache_pods.outputs.cache-hit != 'true'
         run: cd ios && pod install --repo-update
-
-      - name: Cache Xcode Derived Data
-        uses: irgaly/xcode-cache@v1
-        with:
-          key: ${{ runner.os }}-xcode-${{ hashFiles('**/Podfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-xcode-
 
 
       - name: run iOS simulator
         run: |
-          npx react-native run-ios --simulator="iPhone 15 Pro" --mode=Release
+          sed -i -e 's/ONLY_ACTIVE_ARCH = NO;/ONLY_ACTIVE_ARCH = YES;/g' ./ios/MaestroCache.xcodeproj/project.pbxproj
+          npx react-native run-ios --simulator="iPhone 14 Pro (16.4)" --mode=Release
 
 
       - name: run Maestro
