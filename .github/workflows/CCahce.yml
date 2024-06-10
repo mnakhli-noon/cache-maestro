@@ -35,7 +35,7 @@ jobs:
             **/node_modules
           key: ${{ runner.os }}-packages-v2-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-packages-
+            ${{ runner.os }}-packages-v2-
             
 
       - name: install dependencies
@@ -52,10 +52,19 @@ jobs:
             **/ios/Pods
           key: ${{ runner.os }}-pods-v3-${{ hashFiles('**/Podfile.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pods-
+            ${{ runner.os }}-pods-v3-
+
+      - name: Cache ios build
+        uses: actions/cache@v4
+        id: cache_build
+        with:
+          path: |
+            **/ios/build
+          key: ${{ runner.os }}-build-v1-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-build-b1
 
       - name: install pods
-        if: steps.cache_pods.outputs.cache-hit != 'true'
         run: cd ios && pod install --repo-update
 
 
