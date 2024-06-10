@@ -60,7 +60,6 @@ jobs:
 
       - name: run iOS simulator
         run: |
-          sed -i -e 's/ONLY_ACTIVE_ARCH = NO;/ONLY_ACTIVE_ARCH = YES;/g' ./ios/MaestroCache.xcodeproj/project.pbxproj
           npx react-native run-ios --simulator="iPhone 15 Pro" --mode=Release
 
 
