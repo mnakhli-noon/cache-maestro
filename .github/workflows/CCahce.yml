@@ -65,6 +65,7 @@ jobs:
             ${{ runner.os }}-build-b1
 
       - name: install pods
+        if: steps.cache_pods.outputs.cache-hit != 'true'
         run: cd ios && pod install --repo-update
 
 
