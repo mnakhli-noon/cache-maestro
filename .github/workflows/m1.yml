@@ -1,0 +1,10 @@
+name: Trying M1 machine
+
+on: push
+
+jobs:
+  test-m1:
+    runs-on: macos-latest-xlarge
+    steps:
+      - name: Hello World
+        run: echo "Hello World"
