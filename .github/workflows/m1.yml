@@ -4,7 +4,9 @@ on: push
 
 jobs:
   test-m1:
-    runs-on: macos-latest-xlarge
+    runs-on: macos-14
     steps:
       - name: Hello World
         run: echo "Hello World"
+      - name: Runner Info
+        run: system_profiler SPSoftwareDataType SPHardwareDataType
