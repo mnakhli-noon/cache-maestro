@@ -4,7 +4,7 @@ on: push
 
 jobs:
   xcode15-build:
-    runs-on: macos-13
+    runs-on: macos-14
     
     steps:
       - name: Checkout Code
@@ -48,4 +48,4 @@ jobs:
 
       - name: run iOS simulator
         run: |
-          npx react-native run-ios --simulator="iPhone 15 Pro" --mode=Release
+          npx react-native run-ios --simulator="iPhone 15 Pro" --mode=Release --terminal='Terminal'
