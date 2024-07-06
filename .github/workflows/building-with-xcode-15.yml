@@ -1,0 +1,51 @@
+name: Building with XCode 15
+
+on: push
+
+jobs:
+  xcode15-build:
+    runs-on: macos-13
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: install node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+    
+      - name: Cache yarn packages
+        id: cache_yarn
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-packages-v2-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-packages-v2-
+            
+
+      - name: install dependencies
+        if: steps.cache_yarn.outputs.cache-hit != 'true'
+        run: yarn
+
+      - name: Restore Pods cache
+        uses: actions/cache@v4
+        id: cache_pods
+        with:
+          path: |
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods
+            **/ios/Pods
+          key: ${{ runner.os }}-pods-v3-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-v3-
+
+      - name: install pods
+        run: cd ios && pod install --repo-update
+
+
+      - name: run iOS simulator
+        run: |
+          npx react-native run-ios --simulator="iPhone 15 Pro" --mode=Release
