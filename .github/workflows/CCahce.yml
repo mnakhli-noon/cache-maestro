@@ -15,11 +15,8 @@ jobs:
       - name: install node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-          
-      - name: Run xcode-select
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app
-
+          node-version: 20
+    
       - name: Install Maestro
         run: "export MAESTRO_VERSION={1.36.0}; curl -Ls 'https://get.maestro.mobile.dev' | bash && brew tap facebook/fb && brew install facebook/fb/idb-companion"
 
@@ -60,7 +57,7 @@ jobs:
 
       - name: run iOS simulator
         run: |
-          npx react-native run-ios --simulator="iPhone 14 Pro (16.4)" --mode=Release
+          npx react-native run-ios --simulator="iPhone 14 Pro" --mode=Release
 
 
       - name: run Maestro
