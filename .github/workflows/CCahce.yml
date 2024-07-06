@@ -5,9 +5,7 @@ on: push
 jobs:
   ccache-example:
     runs-on: macos-14
-    env: 
-      DEVELOPER_DIR: /Applications/Xcode_15.4.app/Contents/Developer
-
+    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -57,7 +55,7 @@ jobs:
 
       - name: run iOS simulator
         run: |
-          npx react-native run-ios --simulator="iPhone 14 Pro" --mode=Release
+          npx react-native run-ios --simulator="iPhone 15 Pro" --mode=Release
 
 
       - name: run Maestro
