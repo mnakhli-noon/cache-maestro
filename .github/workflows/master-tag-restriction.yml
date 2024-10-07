@@ -1,0 +1,32 @@
+name: Tag Push Restriction
+
+on:
+  push:
+    tags: 
+      - '*'  # Trigger on any tag creation
+
+jobs:
+  check-tag-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check tag push permissions for master or main branch
+        run: |
+          # Define allowed users for the master/main branches
+          ALLOWED_USERS=("aattalla")
+
+          # Get the username of the actor who pushed the tag
+          ACTOR=${GITHUB_ACTOR}
+
+          # Get the branch where the tag is being pushed
+          # Check if the tag points to a commit on master or main
+          IS_MASTER=$(git branch --contains ${GITHUB_SHA} | grep -E 'master|main')
+
+          if [[ -n "$IS_MASTER" ]]; then
+            # Check if the actor is in the allowed users list for master/main branches
+            if [[ ! " ${ALLOWED_USERS[@]} " =~ " ${ACTOR} " ]]; then
+              echo "You are not allowed to push tags to the master or main branch."
+              exit 1
+            fi
+          fi
+
+          echo "Tag push permitted for user: $ACTOR"
