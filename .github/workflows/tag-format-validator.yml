@@ -1,0 +1,49 @@
+name: Validate Tag Format
+
+on:
+  push:
+    tags:
+      - '*'  # Triggers on any tag push
+
+jobs:
+  validate-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check tag format
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          VERSION_PATTERN='^[0-9]+\.[0-9]+'
+          BUILD_NUMBER_PATTERN='-[0-9]+$'
+          INVALID_CHARACTERS='[|&<>]'
+
+          # Check if tag starts with 'v' or 'h'
+          if [[ ! $TAG_NAME =~ ^(v|h) ]]; then
+            echo "Error: Tag must start with 'v' or 'h'. Example: 'v4.34-5565' or 'h4.34-5656'."
+            exit 1
+          fi
+          
+          # Check if tag contains invalid characters
+          if [[ $TAG_NAME =~ $INVALID_CHARACTERS ]]; then
+            echo "Error: Tag contains invalid characters (|, &, <, >). Only alphanumeric characters, dots, and hyphens are allowed."
+            exit 1
+          fi
+          
+          # Check for correct version format
+          if [[ ! $TAG_NAME =~ $VERSION_PATTERN ]]; then
+            echo "Error: Version format is invalid. It must be in the format 'x.y' (e.g., '4.34')."
+            exit 1
+          fi
+          
+          # Check for correct build number format
+          if [[ ! $TAG_NAME =~ $BUILD_NUMBER_PATTERN ]]; then
+            echo "Error: Build number is invalid. It must follow the version and start with '-' (e.g., '-5565')."
+            exit 1
+          fi
+
+          # Check if 'v' or 'h' is lowercase
+          if [[ $TAG_NAME =~ ^[A-Z] ]]; then
+            echo "Error: The prefix must be lowercase. Use 'v' or 'h' at the start."
+            exit 1
+          fi
+
+          echo "Tag format is valid: $TAG_NAME"
