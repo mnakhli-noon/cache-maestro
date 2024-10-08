@@ -1,9 +1,9 @@
-name: Validate Tag Format, Build Progression, and Duplicate Tags
+name: 'Validate Tag Format, Build Progression, and Duplicate Tags'
 
-on:
+'on':
   push:
     tags:
-      - '*'  # Triggers on any tag push
+      - '*'  # Trigger on all tag pushes
 
 jobs:
   validate-tag:
@@ -11,23 +11,43 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        
-      - name: Check tag format, build progression, and duplicate tags
+
+      - name: 'Set up GitHub token'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 'Check tag format, build progression, and duplicate tags'
         run: |
           # Extract the pushed tag name
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          
+
           # Define patterns for validation
           VERSION_PATTERN='^[0-9]+\.[0-9]+'    # Pattern for version format x.y
           BUILD_SEPARATOR_PATTERN='-'          # Separator between version and build number
           BUILD_NUMBER_PATTERN='^[0-9]+$'      # Pattern for build number (digits only)
           INVALID_CHARACTERS='[|&<>]'          # Disallowed characters in tag names
-          VALIDATOR_FILE= tag-format-validator.txt # (To be added) Path to the file that stores the latest tag and build number
-          
+
+          VALIDATOR_FILE=tag-format-validator.txt # Path to the file that stores the latest tag and build number
+
           # 1. Check if the tag-format-validator.txt file exists
           if [ ! -f "$VALIDATOR_FILE" ]; then
-            echo "Error: tag-format-validator.txt file not found. Please add the file with the latest tag and build number."
-            exit 1
+            # Fetch the latest 'v' tag
+            LATEST_V_TAG=$(git tag --list 'v*' --sort=-v:refname | head -n 1)
+
+            if [ -z "$LATEST_V_TAG" ]; then
+              # If no 'v' tag found, initialize the file with default values
+              echo "v0.0-0" > $VALIDATOR_FILE
+            else
+              # Use the latest 'v' tag found
+              echo "$LATEST_V_TAG" > $VALIDATOR_FILE
+            fi
+
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            git add $VALIDATOR_FILE
+            git commit -m "Create tag-format-validator.txt with initial values"
+            git push
           fi
 
           # 2. Read the latest tag and build number from the file
@@ -39,7 +59,7 @@ jobs:
             echo "Error: Tag must start with 'v' or 'h'. Example: 'v4.34-5565' or 'h4.34-5656'."
             exit 1
           fi
-          
+
           # 4. Check for invalid characters in the tag
           if [[ $TAG_NAME =~ $INVALID_CHARACTERS ]]; then
             echo "Error: Tag contains invalid characters (|, &, <, >). Only alphanumeric characters, dots, and hyphens are allowed."
@@ -49,13 +69,13 @@ jobs:
           # 5. Split the new tag into version and build number parts
           VERSION_PART=${TAG_NAME%-*} # Extract version part (before '-')
           BUILD_PART=${TAG_NAME##*-}  # Extract build part (after '-')
-          
+
           # 6. Check if the version part matches the required pattern x.y
           if [[ ! $VERSION_PART =~ $VERSION_PATTERN ]]; then
             echo "Error: Version format is invalid. It must be in the format 'x.y' (e.g., '4.34')."
             exit 1
           fi
-          
+
           # 7. Ensure that the tag contains a '-' separator between version and build number
           if [[ ! $TAG_NAME =~ $BUILD_SEPARATOR_PATTERN ]]; then
             echo "Error: The tag must contain a '-' separating the version from the build number (e.g., '-5565')."
@@ -84,7 +104,7 @@ jobs:
 
           # 11. Fetch tags again to check for updates before committing changes
           git fetch --tags
-          
+
           # 12. Check for duplicate tag (make sure the same tag isn't pushed again)
           if git tag --list | grep -q "^${TAG_NAME}$"; then
             echo "Error: Duplicate tag '${TAG_NAME}' detected. A tag with this value already exists."
@@ -93,15 +113,14 @@ jobs:
 
           # 13. If all checks pass, update the tag-format-validator.txt file with the new tag and build number
           echo "${VERSION_PART}-${BUILD_PART}" > $VALIDATOR_FILE
-          
+
           # 14. Commit the updated tag-format-validator.txt file back to the repository
-          # Set the user name and email to the user who triggered the action
-          git config user.name "${GITHUB_ACTOR}"  # Get the username of who pushed the tag
-          git config user.email "${GITHUB_USER_EMAIL}"  # Get the email of who pushed the tag
+          git config user.name "github-actions[bot]"  # Automation username
+          git config user.email "github-actions[bot]@users.noreply.github.com"  # Automation email
 
           # Stage and push the updated tag-format-validator.txt file
           git add $VALIDATOR_FILE
           git commit -m "Update latest tag and build number to $VERSION_PART-$BUILD_PART"
           git push
-          
+
           echo "Your tag has passed all Tag Validator checks successfully: $TAG_NAME"
